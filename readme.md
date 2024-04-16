@@ -12,15 +12,18 @@ There are two files that might be of interest:
 
 # Making SSH connection to Raspberry PI (Linux only)
 
-* Windows users please use [PuTTY](https://www.putty.org/) or [Tera Term](https://teratermproject.github.io/index-en.html) or anything that accepts SSH connection.
+*Windows users please use software like [PuTTY](https://www.putty.org/), [Tera Term](https://teratermproject.github.io/index-en.html), or anything that accepts SSH connection.
 
+*Here we are assuming the IP of the Raspberry PI is `192.168.1.158`.
+
+Run the following command to establish an SSH connection:
 `ssh ros-dev@192.168.0.158`
 
 *Password for **ros-dev** is `ros-dev`.
 
 ---
 
-Or if you don't want to enter password every time, consider the command `ssh-keygen` and `ssh-copy-id userid@hostname`.
+Or if you don't want to enter password every time, consider the command `ssh-keygen` and `ssh-copy-id ros-dev@192.168.0.158`.
 
 # Command to run `encoder_to_odom.launch`
 
@@ -41,7 +44,7 @@ roslaunch robot_encoder_odom agv_base_control_odom.launch
 
 *Make sure you have already setup the corresponding package and configuration.
 
-*Make sure **encoder_to_odom.launch** is running before running **controller.py**
+*Make sure **encoder_to_odom.launch** runs before **controller.py**
 
 Open another terminal, login, then run the following command:
 ```bash

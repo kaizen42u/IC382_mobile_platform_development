@@ -1,0 +1,8 @@
+{
+    "C_Cpp.errorSquiggles": "Disabled",
+    "cSpell.words": [
+        "dtheta",
+        "Odometry"
+    ],
+    "python.analysis.typeCheckingMode": "basic"
+}

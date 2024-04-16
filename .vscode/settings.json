@@ -1,8 +1,13 @@
 {
     "C_Cpp.errorSquiggles": "Disabled",
     "cSpell.words": [
+        "devel",
         "dtheta",
-        "Odometry"
+        "Odometry",
+        "roslaunch",
+        "rosrun",
+        "Tera",
+        "userid"
     ],
     "python.analysis.typeCheckingMode": "basic"
 }

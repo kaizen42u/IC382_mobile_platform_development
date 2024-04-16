@@ -14,7 +14,7 @@ There are two files that might be of interest:
 
 *Windows users please use software like [PuTTY](https://www.putty.org/), [Tera Term](https://teratermproject.github.io/index-en.html), or anything that accepts SSH connection.
 
-*Here we are assuming the IP of the Raspberry PI is `192.168.1.158`.
+*Here we are assuming the IP of the Raspberry PI is `192.168.0.158`.
 
 Run the following command to establish an SSH connection:
 `ssh ros-dev@192.168.0.158`

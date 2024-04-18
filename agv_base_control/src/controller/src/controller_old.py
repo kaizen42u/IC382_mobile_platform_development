@@ -38,14 +38,20 @@ speed = Twist()
 r = rospy.Rate(5)
 
 goal = Point()
-goals = ([0.85, 0, 0, 0], [1, 1, 1, math.pi / 2])  # [x, y, cp, angle]
+goals = ([1.8, 0, 0, 0], [1.8, 1.2, 1, math.pi / 2])  # [x, y, cp, angle]
 cp = 0
 angle = 0
 goal.x = 0
 goal.y = 0
 watchdog = 0
+watchdog_limit = [10, 30]
 
-turn_power = 0.45
+turn_power = 0.65
+linear_power = 0.55
+turn_p = 0.0
+linear_p = 0.0
+last_x = 0.0
+last_y = 0.0
 
 while not rospy.is_shutdown():
     for goal_l in goals:
@@ -53,52 +59,77 @@ while not rospy.is_shutdown():
         speed.linear.x = 0.0
         speed.angular.z = 0.0
         time.sleep(1)
-        correct_path_count = 0
         watchdog = time.time()
         while True:
             if not message_available:
                 pass
+            
+            delta_x = x - last_x
+            delta_y = y - last_y
+            
+            inc_x = goal.x - x
+            inc_y = goal.y - y
 
             distance_to_goal = sqrt((goal.y - y) ** 2 + (goal.x - x) ** 2)
             message_available = False
             delta_angle = angle - theta
-            if delta_angle > 0.2:
-                speed.linear.x = 0.0
+
+            if (delta_x < 0.1) & (cp == 0):
+                linear_p += 0.02
+            elif (delta_x > 0.0) & (cp == 0):
+                linear_p -= 0.02
+
+            if (delta_y < 0.1) & (cp == 1):
+                linear_p += 0.02
+            elif (delta_y > 0.0) & (cp == 1):
+                linear_p -= 0.02
+
+            if delta_angle > 0.1:
+                speed.linear.x = 0.1
                 speed.angular.z = turn_power + delta_angle / 5
-                # speed.angular.z *= 1 - ((time.time() - watchdog) / 30)
-                correct_path_count = 0
-            elif delta_angle < -0.2:
-                speed.linear.x = 0.0
+            elif delta_angle < -0.1:
+                speed.linear.x = 0.1
                 speed.angular.z = -turn_power + delta_angle / 5
-                # speed.angular.z *= 1 - ((time.time() - watchdog) / 30)
-                correct_path_count = 0
             else:
-                speed.linear.x = 0.0
+                speed.linear.x = linear_power + linear_p
                 speed.angular.z = 0.0
-                correct_path_count += 1
-                if correct_path_count > 10:
-                    break
 
             if (distance_to_goal < 0.2) & (cp == 1):
                 speed.linear.x = 0.0
                 speed.angular.z = 0.0
+                last_x = x
+                last_y = y
                 break
 
-            if time.time() - watchdog > 20:
+            if distance_to_goal < 0.2:
+                goal.x = goal_l[0]
+                goal.y = goal_l[1]
+                cp = goal_l[2]
+                angle = goal_l[3]
+                last_x = x
+                last_y = y
+                break
+
+            if time.time() - watchdog > watchdog_limit[cp]:
                 speed.linear.x = 0.0
                 speed.angular.z = 0.0
+                last_x = x
+                last_y = y
                 break
 
-            print(f"Watchdog {time.time() - watchdog}")
+            last_x = x
+            last_y = y
+            
             print(f"Target {goal.x = }, {goal.y = }")
             print(f"Current {x = }, {y = }")
+            print(f"Delta {delta_x = }, {delta_y = }")
             print(f"{angle = }")
             print(f"{speed = }")
             print("")
 
             pub.publish(speed)
             r.sleep()
-
+        '''
         speed.linear.x = 0.0
         speed.angular.z = 0.0
         time.sleep(1)
@@ -122,11 +153,11 @@ while not rospy.is_shutdown():
                 speed.linear.x = 0.0
                 speed.angular.z = -turn_power + delta_angle / 5
             else:
-                speed.linear.x = min(0.20 + distance_to_goal / 15, 0.35)
+                speed.linear.x = min(0.20 + distance_to_goal / 15, 0.25)
                 speed.angular.z = min(delta_angle, 1.0)
                 # speed.angular.z = 0
 
-            if (distance_to_goal < 0.25) & (cp == 1):
+            if (distance_to_goal < 0.2) & (cp == 1):
                 speed.linear.x = 0.0
                 speed.angular.z = 0.0
                 break
@@ -143,7 +174,6 @@ while not rospy.is_shutdown():
                 speed.angular.z = 0.0
                 break
 
-            print(f"Watchdog {time.time() - watchdog}")
             print(f"Target {goal.x = }, {goal.y = }")
             print(f"Current {x = }, {y = }")
             print(f"{distance_to_goal = }")
@@ -154,7 +184,7 @@ while not rospy.is_shutdown():
 
             pub.publish(speed)
             r.sleep()
-
+            '''
     speed.linear.x = 0.0
     speed.angular.z = 0.0
     pub.publish(speed)

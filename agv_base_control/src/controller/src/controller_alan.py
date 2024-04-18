@@ -38,7 +38,7 @@ speed = Twist()
 r = rospy.Rate(5)
 
 goal = Point()
-goals = ([0.85, 0, 0, 0], [1, 1, 1, math.pi / 2])  # [x, y, cp, angle]
+goals = ([1.8, 0, 0, 0], [1.85, 1.2, 1, math.pi / 2])  # [x, y, cp, angle]
 cp = 0
 angle = 0
 goal.x = 0
@@ -62,15 +62,13 @@ while not rospy.is_shutdown():
             distance_to_goal = sqrt((goal.y - y) ** 2 + (goal.x - x) ** 2)
             message_available = False
             delta_angle = angle - theta
-            if delta_angle > 0.2:
+            if delta_angle > 0.1:
                 speed.linear.x = 0.0
-                speed.angular.z = turn_power + delta_angle / 5
-                # speed.angular.z *= 1 - ((time.time() - watchdog) / 30)
+                speed.angular.z = turn_power + delta_angle * 3
                 correct_path_count = 0
-            elif delta_angle < -0.2:
+            elif delta_angle < -0.1:
                 speed.linear.x = 0.0
-                speed.angular.z = -turn_power + delta_angle / 5
-                # speed.angular.z *= 1 - ((time.time() - watchdog) / 30)
+                speed.angular.z = -turn_power + delta_angle * 3
                 correct_path_count = 0
             else:
                 speed.linear.x = 0.0
@@ -84,7 +82,7 @@ while not rospy.is_shutdown():
                 speed.angular.z = 0.0
                 break
 
-            if time.time() - watchdog > 20:
+            if time.time() - watchdog > 10:
                 speed.linear.x = 0.0
                 speed.angular.z = 0.0
                 break
@@ -117,16 +115,16 @@ while not rospy.is_shutdown():
             delta_angle = angle_to_goal - theta
             if delta_angle > 0.5:
                 speed.linear.x = 0.0
-                speed.angular.z = turn_power + delta_angle / 5
+                speed.angular.z = turn_power + delta_angle * 3
             elif delta_angle < -0.5:
                 speed.linear.x = 0.0
-                speed.angular.z = -turn_power + delta_angle / 5
+                speed.angular.z = -turn_power + delta_angle * 3
             else:
-                speed.linear.x = min(0.20 + distance_to_goal / 15, 0.35)
-                speed.angular.z = min(delta_angle, 1.0)
+                speed.linear.x = min(0.4 + distance_to_goal / 5, 0.55)
+                speed.angular.z = delta_angle * 2
                 # speed.angular.z = 0
 
-            if (distance_to_goal < 0.25) & (cp == 1):
+            if (distance_to_goal < 0.2) & (cp == 1):
                 speed.linear.x = 0.0
                 speed.angular.z = 0.0
                 break
